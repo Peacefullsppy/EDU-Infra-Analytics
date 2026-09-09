@@ -74,7 +74,6 @@ Desenvolver uma plataforma capaz de **monitorar, organizar e analisar a infraest
 ### Prototipação e documentação
 
 - Figma
-- Excalidraw
 
 ## ✅ Checklist do projeto
 
