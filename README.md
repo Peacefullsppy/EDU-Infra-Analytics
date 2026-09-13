@@ -1,411 +1,245 @@
+# EDU-Infra Analytics
 
+Sistema para diagnóstico e monitoramento da infraestrutura tecnológica de ambientes educacionais.
 
+##  Descrição do projeto
 
-EDU-Infra Analytics
-Plataforma para diagnóstico, monitoramento e acompanhamento da infraestrutura tecnológica de ambientes educacionais.
+O **EDU-Infra Analytics** é uma plataforma desenvolvida como Projeto Final de Curso em Engenharia de Software, com foco no acompanhamento da infraestrutura tecnológica de instituições de ensino.
 
-Sobre o projeto
-O EDU-Infra Analytics é um projeto acadêmico desenvolvido no curso de Engenharia de Software com o objetivo de auxiliar equipes de TI e gestores escolares no acompanhamento da infraestrutura tecnológica de laboratórios de informática.
+A proposta do sistema é centralizar informações sobre laboratórios e computadores, coletar métricas de desempenho e disponibilidade dos equipamentos e apresentar esses dados em dashboards, indicadores, alertas e relatórios.
 
-A proposta é centralizar informações sobre laboratórios e computadores, permitindo visualizar a situação dos equipamentos, acompanhar métricas de desempenho, identificar problemas e futuramente gerar indicadores e relatórios que apoiem a tomada de decisão.
+A plataforma busca auxiliar equipes de TI e gestores na identificação de problemas relacionados à infraestrutura tecnológica, contribuindo para uma manutenção mais organizada e para uma melhor tomada de decisão.
 
-O projeto está sendo desenvolvido de forma incremental, começando pelas funcionalidades essenciais do MVP.
+## Objetivo
 
-Objetivo
-Desenvolver uma plataforma capaz de organizar, monitorar e analisar a infraestrutura tecnológica de ambientes educacionais, facilitando a identificação de problemas em laboratórios e computadores.
+Desenvolver uma plataforma capaz de **monitorar, organizar e analisar a infraestrutura tecnológica de ambientes educacionais**, permitindo o acompanhamento de laboratórios e computadores e fornecendo indicadores que apoiem equipes de TI e gestores.
 
-Objetivos específicos
-Cadastrar e gerenciar laboratórios.
+### Objetivos específicos
 
-Cadastrar e gerenciar computadores.
+- Cadastrar e gerenciar laboratórios.
+- Cadastrar e gerenciar computadores.
+- Coletar informações de CPU, memória RAM, armazenamento e disponibilidade.
+- Registrar o histórico das métricas coletadas.
+- Exibir os dados em um dashboard.
+- Criar alertas relacionados ao estado dos equipamentos.
+- Desenvolver indicadores para avaliação da infraestrutura.
+- Implementar o Índice de Infraestrutura Educacional (IIE).
+- Gerar relatórios para acompanhamento da infraestrutura.
+- Validar a solução em um ambiente educacional simulado.
 
-Relacionar computadores aos laboratórios cadastrados.
+## 🛠️ Tecnologias previstas
 
-Coletar informações de CPU, memória RAM, armazenamento e disponibilidade.
+### Frontend
 
-Exibir informações em dashboards.
+- React
+- JavaScript
+- HTML
+- CSS
+- Vite
+- ESLint
 
-Criar alertas para equipamentos com problemas.
+### Backend
+
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- Alembic
 
-Criar indicadores de infraestrutura.
-
-Desenvolver o Índice de Infraestrutura Educacional (IIE).
-
-Gerar relatórios para acompanhamento da infraestrutura.
-
-Validar o sistema em um ambiente educacional simulado.
-
-Regra de negócio implementada
-RN01 — Vínculo entre computador e laboratório
-Todo computador cadastrado deve estar vinculado a um laboratório previamente cadastrado no sistema.
-
-O cadastro deve ser recusado quando o laboratorio_id informado não corresponder a um laboratório existente.
-
-Fluxo simplificado:
-
-Cadastro de computador
-        |
-        v
-Recebe laboratorio_id
-        |
-        v
-Laboratório existe?
-     /       \
-   Sim       Não
-    |         |
-    v         v
-Cadastrar   Recusar cadastro
-Tecnologias
-Frontend
-React
-
-JavaScript
-
-HTML
-
-CSS
-
-Vite
-
-ESLint
-
-Backend
-Python
-
-FastAPI
-
-Pydantic
-
-Banco de dados
-Planejado para as próximas etapas:
-
-PostgreSQL
-
-SQLAlchemy
-
-Alembic
-
-Monitoramento
-Planejado:
-
-Python
-
-psutil
-
-Testes
-Swagger / OpenAPI do FastAPI
-
-Postman
-
-Pytest
-
-Infraestrutura
-Hyper-V
-
-Windows Server
-
-Versionamento
-Git
-
-GitHub
-
-GitHub Projects
-
-Prototipação e documentação
-Figma
-
-Excalidraw
-
-Estrutura do projeto
-EDU-Infra-Analytics/
-|
-|-- backend/
-|   |-- app/
-|   |   |-- main.py
-|   |   |-- models.py
-|   |   |-- schemas.py
-|   |   `-- database.py
-|   |
-|   |-- tests/
-|   `-- requirements.txt
-|
-|-- frontend/
-|   |-- public/
-|   |-- src/
-|   |   |-- assets/
-|   |   |-- components/
-|   |   |-- pages/
-|   |   |-- services/
-|   |   |-- App.jsx
-|   |   `-- main.jsx
-|   |
-|   |-- package.json
-|   `-- vite.config.js
-|
-|-- docs/
-|-- infrastructure/
-|-- .gitignore
-`-- README.md
-Funcionalidades atuais
-Visualização da área de Laboratórios.
-
-Cards com resumo dos laboratórios e equipamentos.
-
-Listagem dos laboratórios.
-
-Cadastro básico de laboratórios.
-
-Listagem de computadores.
-
-Cadastro básico de computadores.
-
-Validação da RN01.
-
-Comunicação entre frontend React e backend FastAPI.
-
-Nesta fase inicial, parte dos dados ainda pode estar armazenada temporariamente em memória. A persistência com PostgreSQL será adicionada posteriormente.
-
-Como executar o projeto
-1. Backend
-Entre na pasta:
-
-cd backend
-Crie o ambiente virtual, caso ainda não exista:
-
-python -m venv .venv
-Ative o ambiente virtual no PowerShell:
-
-.\.venv\Scripts\Activate.ps1
-Instale as dependências:
-
-pip install -r requirements.txt
-Execute a API:
-
-uvicorn app.main:app --reload
-A API ficará disponível em:
-
-http://127.0.0.1:8000
-Documentação automática:
-
-http://127.0.0.1:8000/docs
-2. Frontend
-Em outro terminal:
-
-cd frontend
-Instale as dependências:
-
-npm install
-Execute o projeto:
-
-npm run dev
-O endereço normalmente será:
-
-http://localhost:5173
-Checklist
-Planejamento e documentação
-Definir tema do projeto
-
-Definir problema
-
-Definir objetivo geral
-
-Definir objetivos específicos
-
-Definir escopo inicial
-
-Definir tecnologias
-
-Criar arquitetura inicial
-
-Criar protótipos no Figma
-
-Finalizar requisitos funcionais
-
-Finalizar requisitos não funcionais
-
-Criar histórias de usuário
-
-Criar critérios de aceitação
-
-Criar DER
-
-Criar diagramas UML necessários
-
-Estrutura e versionamento
-Criar repositório Git
-
-Configurar GitHub
-
-Criar estrutura do backend
-
-Criar estrutura do frontend
-
-Configurar .gitignore
-
-Utilizar branches para desenvolvimento
-
-Configurar GitHub Projects
-
-Organizar documentação na pasta docs
-
-Backend
-Configurar FastAPI
-
-Criar endpoint inicial da API
-
-Criar cadastro básico de laboratórios
-
-Criar listagem de laboratórios
-
-Criar cadastro básico de computadores
-
-Criar listagem de computadores
-
-Implementar RN01
-
-Configurar PostgreSQL
-
-Configurar SQLAlchemy
-
-Configurar Alembic
-
-Criar persistência de laboratórios
-
-Criar persistência de computadores
-
-Criar validações adicionais
-
-Criar sistema de alertas
-
-Criar endpoints de indicadores
-
-Criar endpoints de relatórios
-
-Frontend
-Configurar React com Vite
-
-Criar estrutura inicial do frontend
-
-Criar tela de Laboratórios
-
-Criar tela de Computadores completa
-
-Criar Dashboard completo
-
-Criar tela de Indicadores
-
-Criar tela de Relatórios
-
-Integrar todas as telas com a API
-
-Melhorar responsividade
-
-Criar tratamento visual de erros e carregamento
-
-Monitoramento
-Criar agente Python
-
-Coletar CPU
-
-Coletar memória RAM
-
-Coletar armazenamento
-
-Coletar hostname
-
-Coletar endereço IP
-
-Coletar disponibilidade
-
-Enviar métricas para a API
-
-Salvar histórico de métricas
-
-Indicadores
-Definir regras do IIE
-
-Implementar cálculo do IIE
-
-Exibir IIE por laboratório
-
-Criar indicadores gerais
-
-Criar alertas de manutenção
-
-Testes
-Testar endpoints básicos pelo Swagger
-
-Testar RN01 com laboratório existente
-
-Testar RN01 com laboratório inexistente
-
-Criar testes automatizados com Pytest
-
-Criar coleção no Postman
-
-Testar integração frontend/backend
-
-Testar integração com PostgreSQL
-
-Executar testes funcionais do MVP
-
-Infraestrutura e validação
-Configurar Hyper-V
-
-Configurar máquinas virtuais
-
-Preparar Windows Server
-
-Criar ambiente educacional simulado
-
-Instalar agente de monitoramento
-
-Validar coleta de métricas
-
-Entrega final
-Revisar código
-
-Revisar documentação
-
-Atualizar README
-
-Registrar evidências
-
-Finalizar MVP
-
-Preparar apresentação
-
-Finalizar documentação acadêmica
-
-Arquitetura prevista
+### Banco de dados
+
+- PostgreSQL
+
+### Monitoramento
+
+- Python
+- psutil
+
+### Testes
+
+- Pytest
+- Postman
+
+### Infraestrutura
+
+- Hyper-V
+- Windows Server
+
+### Versionamento e gerenciamento
+
+- Git
+- GitHub
+- GitHub Projects
+
+### Prototipação e documentação
+
+- Figma
+
+## ✅ Checklist do projeto
+
+### 1. Planejamento e documentação
+
+- [x] Definir o tema do projeto
+- [x] Definir o problema
+- [x] Definir o objetivo geral
+- [x] Definir os objetivos específicos
+- [x] Definir o escopo inicial
+- [x] Definir as tecnologias do projeto
+- [x] Criar a arquitetura inicial do sistema
+- [x] Criar protótipos iniciais no Figma
+- [ ] Finalizar requisitos funcionais
+- [ ] Finalizar requisitos não funcionais
+- [ ] Criar histórias de usuário
+- [ ] Definir critérios de aceitação
+- [ ] Criar diagrama de casos de uso
+- [ ] Criar diagrama de classes
+- [ ] Criar o DER do banco de dados
+
+### 2. Estrutura do projeto
+
+- [x] Criar repositório no GitHub
+- [x] Criar estrutura inicial do frontend
+- [x] Criar estrutura inicial do backend
+- [x] Configurar `.gitignore`
+- [ ] Criar estrutura do agente de monitoramento
+- [ ] Criar estrutura de testes
+- [ ] Criar estrutura de documentação
+- [ ] Configurar GitHub Projects
+
+### 3. Backend
+
+- [ ] Configurar FastAPI
+- [ ] Configurar conexão com PostgreSQL
+- [ ] Configurar SQLAlchemy
+- [ ] Configurar Alembic
+- [ ] Criar modelo de usuários
+- [ ] Criar modelo de laboratórios
+- [ ] Criar modelo de computadores
+- [ ] Criar modelo de métricas
+- [ ] Criar modelo de alertas
+- [ ] Criar autenticação com JWT
+- [ ] Implementar controle de acesso por perfil
+- [ ] Criar API de laboratórios
+- [ ] Criar API de computadores
+- [ ] Criar API de métricas
+- [ ] Criar API de alertas
+- [ ] Criar API de indicadores
+- [ ] Criar API de relatórios
+
+### 4. Frontend
+
+- [ ] Criar layout principal
+- [ ] Criar tela de login
+- [ ] Criar dashboard
+- [ ] Criar tela de laboratórios
+- [ ] Criar tela de computadores
+- [ ] Criar tela de detalhes do computador
+- [ ] Criar tela de indicadores
+- [ ] Criar tela de relatórios
+- [ ] Integrar frontend com a API
+- [ ] Implementar tratamento de erros
+- [ ] Implementar estados de carregamento
+
+### 5. Agente de monitoramento
+
+- [ ] Criar agente em Python
+- [ ] Coletar uso de CPU
+- [ ] Coletar uso de memória RAM
+- [ ] Coletar uso de armazenamento
+- [ ] Coletar disponibilidade do equipamento
+- [ ] Coletar hostname
+- [ ] Coletar endereço IP
+- [ ] Enviar métricas para a API
+- [ ] Criar tratamento de falhas de comunicação
+- [ ] Testar agente em ambiente virtualizado
+
+### 6. Indicadores e relatórios
+
+- [ ] Definir regras do Índice de Infraestrutura Educacional (IIE)
+- [ ] Implementar cálculo do IIE
+- [ ] Exibir o IIE no dashboard
+- [ ] Criar histórico de indicadores
+- [ ] Criar relatórios de infraestrutura
+- [ ] Criar alertas visuais no dashboard
+
+### 7. Testes
+
+- [ ] Criar testes unitários com Pytest
+- [ ] Testar endpoints com Postman
+- [ ] Testar autenticação
+- [ ] Testar integração com PostgreSQL
+- [ ] Testar integração entre frontend e backend
+- [ ] Testar coleta do agente
+- [ ] Testar geração de indicadores
+- [ ] Realizar testes funcionais
+
+### 8. Ambiente de validação
+
+- [ ] Configurar Hyper-V
+- [ ] Criar máquinas virtuais
+- [ ] Configurar Windows Server
+- [ ] Preparar ambiente educacional simulado
+- [ ] Instalar agente nos computadores simulados
+- [ ] Validar coleta e envio das métricas
+
+### 9. Finalização
+
+- [ ] Revisar código
+- [ ] Revisar segurança
+- [ ] Revisar documentação
+- [ ] Registrar evidências com screenshots
+- [ ] Atualizar diagramas
+- [ ] Atualizar README
+- [ ] Finalizar documentação acadêmica
+- [ ] Preparar apresentação do projeto
+- [ ] Finalizar versão MVP
+
+##  Arquitetura resumida
+
+```text
 Computadores dos laboratórios
-            |
-            v
-     Agente de monitoramento
-        Python + psutil
-            |
-            v
-          JSON
-            |
-            v
-         FastAPI
-            |
-            v
+            ↓
+     Agente Python
+         (psutil)
+            ↓
+           JSON
+            ↓
+       FastAPI / API
+            ↓
        PostgreSQL
-            |
-            v
+            ↓
      React / Dashboard
-            |
-            v
-    Equipe de TI / Gestores
-Status
-Em desenvolvimento.
+            ↓
+ Equipe de TI / Gestores
+```
 
-Atualmente o projeto está na etapa inicial do MVP, com foco no cadastro e gerenciamento de laboratórios e computadores e na implementação das primeiras regras de negócio.
+##  Funcionalidades previstas
 
-Projeto acadêmico
-Projeto: EDU-Infra Analytics
-Curso: Bacharelado em Engenharia de Software
-Instituição: Universidade de Mogi das Cruzes — UMC
+- Gerenciamento de laboratórios
+- Gerenciamento de computadores
+- Monitoramento de recursos
+- Histórico de métricas
+- Dashboard
+- Alertas
+- Indicadores
+- Índice de Infraestrutura Educacional
+- Relatórios
+- Autenticação e controle de acesso
 
-Este README será atualizado conforme novas funcionalidades forem implementadas.
+##  Status do projeto
+
+> Em desenvolvimento.
+
+O projeto encontra-se na etapa de estruturação e implementação inicial do frontend, backend e ambiente de desenvolvimento.
+
+## Projeto acadêmico
+
+Projeto desenvolvido como parte do **Projeto Final de Curso em Engenharia de Software**.
+
+**Projeto:** EDU-Infra Analytics  
+**Curso:** Bacharelado em Engenharia de Software  
+**Instituição:** Universidade de Mogi das Cruzes (UMC)
+
+---
+
+> Este README será atualizado conforme o desenvolvimento do projeto avançar.
