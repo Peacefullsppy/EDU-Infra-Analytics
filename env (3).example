@@ -1,0 +1,15 @@
+# Copie este arquivo para .env e preencha os valores reais.
+# Não envie o .env para o GitHub.
+
+# Supabase > Project > Connect > Session pooler (porta 5432)
+# Exemplo de formato:
+# DATABASE_URL=postgresql://postgres.PROJECT_REF:SENHA@HOST_POOLER:5432/postgres?sslmode=require
+DATABASE_URL=
+
+JWT_SECRET_KEY=gere-uma-chave-aleatoria-longa
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+FRONTEND_URL=http://localhost:5173
+
+ADMIN_NAME=Administrador
+ADMIN_EMAIL=admin@escola.edu
+ADMIN_PASSWORD=
