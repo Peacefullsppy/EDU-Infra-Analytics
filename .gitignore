@@ -1,53 +1,33 @@
-# =========================
-# Python / Backend
-# =========================
-
+# Python
+backend/.venv/
 .venv/
 venv/
-env/
 __pycache__/
-*.py[cod]
+*.pyc
 *.pyo
-*.pyd
+.pytest_cache/
 
-# Variáveis de ambiente
+# Banco local
+*.db
+*.sqlite3
+
+# Node
+frontend/node_modules/
+node_modules/
+frontend/dist/
+dist/
+
+# Segredos
 .env
 .env.*
 !.env.example
 
-# Pytest
-.pytest_cache/
-
-# =========================
-# React / Node
-# =========================
-
-node_modules/
-dist/
-build/
-
-# =========================
-# IDE
-# =========================
-
+# IDE / SO
 .vscode/
 .idea/
-
-# =========================
-# Sistema operacional
-# =========================
-
-Thumbs.db
 .DS_Store
+Thumbs.db
 
-# =========================
-# Logs
-# =========================
-
+# Logs e pacotes
 *.log
-
-# =========================
-# Arquivos compactados
-# =========================
-
 *.zip
