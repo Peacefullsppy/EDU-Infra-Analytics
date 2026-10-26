@@ -1,245 +1,83 @@
-# EDU-Infra Analytics
+# EDU-Infra Analytics — reconstrução autoral desde zero
 
-Sistema para diagnóstico e monitoramento da infraestrutura tecnológica de ambientes educacionais.
+Nova base independente, criada após **auditoria** da monografia V2 e do ZIP fornecido. Não foram reaproveitados componentes React, layouts do Figma, scripts de seed, imagens ou módulos Python anteriores. Nenhum computador ou laboratório é cadastrado automaticamente.
 
-##  Descrição do projeto
+## O que já funciona (v0.1)
 
-O **EDU-Infra Analytics** é uma plataforma desenvolvida como Projeto Final de Curso em Engenharia de Software, com foco no acompanhamento da infraestrutura tecnológica de instituições de ensino.
+- REST FastAPI autenticada via JWT; Argon2; perfil `admin`, `tecnico`, `gestor`.
+- Criação do **primeiro administrador pelo terminal**, com senha digitada e sem credenciais de demonstração.
+- CRUD de laboratórios e computadores (API e telas React), RBAC e logs de auditoria.
+- Exclusão de laboratório somente por admin, **proibida** se existirem computadores vinculados. Nenhuma exclusão em cascata de computador.
+- Dados reais consultados diretamente do banco. Sem métricas inventadas, seed, data fixa, gráfico fictício ou IIE fabricado.
+- Dashboard, indicadores, alertas derivados de medições existentes, resumo, privacidade, gestão de usuários e auditoria.
+- Migração inicial Alembic que cria esquema **vazio**; PostgreSQL/Supabase como destino da demonstração e SQLite local explícito.
+- Sete testes backend automatizados (em 20/10/2026).
 
-A proposta do sistema é centralizar informações sobre laboratórios e computadores, coletar métricas de desempenho e disponibilidade dos equipamentos e apresentar esses dados em dashboards, indicadores, alertas e relatórios.
+**Ainda não implementado:** agente de telemetria/psutil, ingestão de métricas, histórico temporal, cálculo validado do IIE, módulo educacional, relatórios exportáveis, ViaCEP e implantação Hyper-V. Ver cronograma em `docs/`.
 
-A plataforma busca auxiliar equipes de TI e gestores na identificação de problemas relacionados à infraestrutura tecnológica, contribuindo para uma manutenção mais organizada e para uma melhor tomada de decisão.
+## Instalação e execução — Windows PowerShell
 
-## Objetivo
+Pré-requisitos: Python 3.12+, Node.js com npm, PowerShell e acesso ao registry npm. Ter PostgreSQL/Supabase é necessário para a versão final, mas não para executar a primeira versão em SQLite local.
 
-Desenvolver uma plataforma capaz de **monitorar, organizar e analisar a infraestrutura tecnológica de ambientes educacionais**, permitindo o acompanhamento de laboratórios e computadores e fornecendo indicadores que apoiem equipes de TI e gestores.
+### Terminal 1 — backend
 
-### Objetivos específicos
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+```
 
-- Cadastrar e gerenciar laboratórios.
-- Cadastrar e gerenciar computadores.
-- Coletar informações de CPU, memória RAM, armazenamento e disponibilidade.
-- Registrar o histórico das métricas coletadas.
-- Exibir os dados em um dashboard.
-- Criar alertas relacionados ao estado dos equipamentos.
-- Desenvolver indicadores para avaliação da infraestrutura.
-- Implementar o Índice de Infraestrutura Educacional (IIE).
-- Gerar relatórios para acompanhamento da infraestrutura.
-- Validar a solução em um ambiente educacional simulado.
+**Obrigatório:** abra `backend/.env` e substitua `JWT_SECRET_KEY` por uma string aleatória com ao menos 32 caracteres. Para gerar uma no PowerShell, rode:
 
-## 🛠️ Tecnologias previstas
+```powershell
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
 
-### Frontend
+Cole a saída em `JWT_SECRET_KEY=` dentro de `.env`, **sem registrar essa chave no GitHub**. O arquivo `.env.example` usa SQLite local explicitamente para facilitar o primeiro uso. Para PostgreSQL/Supabase, substitua `DATABASE_URL` por uma string de conexão PostgreSQL com `psycopg`. Confirme os parâmetros pelo painel Connect do seu Supabase, sem expor a senha.
 
-- React
-- JavaScript
-- HTML
-- CSS
-- Vite
-- ESLint
+```powershell
+python -m alembic upgrade head
+python -m app.cli create-admin
+python -m uvicorn app.main:app --reload
+```
 
-### Backend
+Digite nome, e-mail e senha forte no assistente `create-admin`; esse fluxo não cria laboratórios nem computadores. Rotas: `http://127.0.0.1:8000/docs` (OpenAPI) e `http://127.0.0.1:8000/health`.
 
-- Python
-- FastAPI
-- Pydantic
-- SQLAlchemy
-- Alembic
+**Importante:** execute `create-admin` somente quando não houver usuários. Outras contas são cadastradas na tela de Usuários após autenticar como admin. Para banco local totalmente novo, use outro banco/arquivo e repita as migrações (não apagar dados de trabalho).
 
-### Banco de dados
+### Terminal 2 — frontend
 
-- PostgreSQL
+```powershell
+cd frontend
+Copy-Item .env.example .env
+npm install
+npm run dev
+```
 
-### Monitoramento
-
-- Python
-- psutil
+Abra `http://127.0.0.1:5173`, entre com a conta criada no terminal e faça seu **primeiro cadastro real** de laboratório. Em seguida crie um computador associado. O painel mostrará números dos registros cadastrados e o estado `Sem coleta`, pois o agente ainda não está implementado. O IIE aparece `Não calculado`.
 
 ### Testes
 
-- Pytest
-- Postman
-
-### Infraestrutura
-
-- Hyper-V
-- Windows Server
-
-### Versionamento e gerenciamento
-
-- Git
-- GitHub
-- GitHub Projects
-
-### Prototipação e documentação
-
-- Figma
-
-## ✅ Checklist do projeto
-
-### 1. Planejamento e documentação
-
-- [x] Definir o tema do projeto
-- [x] Definir o problema
-- [x] Definir o objetivo geral
-- [x] Definir os objetivos específicos
-- [x] Definir o escopo inicial
-- [x] Definir as tecnologias do projeto
-- [x] Criar a arquitetura inicial do sistema
-- [x] Criar protótipos iniciais no Figma
-- [ ] Finalizar requisitos funcionais
-- [ ] Finalizar requisitos não funcionais
-- [ ] Criar histórias de usuário
-- [ ] Definir critérios de aceitação
-- [ ] Criar diagrama de casos de uso
-- [ ] Criar diagrama de classes
-- [ ] Criar o DER do banco de dados
-
-### 2. Estrutura do projeto
-
-- [x] Criar repositório no GitHub
-- [x] Criar estrutura inicial do frontend
-- [x] Criar estrutura inicial do backend
-- [x] Configurar `.gitignore`
-- [ ] Criar estrutura do agente de monitoramento
-- [ ] Criar estrutura de testes
-- [ ] Criar estrutura de documentação
-- [ ] Configurar GitHub Projects
-
-### 3. Backend
-
-- [ ] Configurar FastAPI
-- [ ] Configurar conexão com PostgreSQL
-- [ ] Configurar SQLAlchemy
-- [ ] Configurar Alembic
-- [ ] Criar modelo de usuários
-- [ ] Criar modelo de laboratórios
-- [ ] Criar modelo de computadores
-- [ ] Criar modelo de métricas
-- [ ] Criar modelo de alertas
-- [ ] Criar autenticação com JWT
-- [ ] Implementar controle de acesso por perfil
-- [ ] Criar API de laboratórios
-- [ ] Criar API de computadores
-- [ ] Criar API de métricas
-- [ ] Criar API de alertas
-- [ ] Criar API de indicadores
-- [ ] Criar API de relatórios
-
-### 4. Frontend
-
-- [ ] Criar layout principal
-- [ ] Criar tela de login
-- [ ] Criar dashboard
-- [ ] Criar tela de laboratórios
-- [ ] Criar tela de computadores
-- [ ] Criar tela de detalhes do computador
-- [ ] Criar tela de indicadores
-- [ ] Criar tela de relatórios
-- [ ] Integrar frontend com a API
-- [ ] Implementar tratamento de erros
-- [ ] Implementar estados de carregamento
-
-### 5. Agente de monitoramento
-
-- [ ] Criar agente em Python
-- [ ] Coletar uso de CPU
-- [ ] Coletar uso de memória RAM
-- [ ] Coletar uso de armazenamento
-- [ ] Coletar disponibilidade do equipamento
-- [ ] Coletar hostname
-- [ ] Coletar endereço IP
-- [ ] Enviar métricas para a API
-- [ ] Criar tratamento de falhas de comunicação
-- [ ] Testar agente em ambiente virtualizado
-
-### 6. Indicadores e relatórios
-
-- [ ] Definir regras do Índice de Infraestrutura Educacional (IIE)
-- [ ] Implementar cálculo do IIE
-- [ ] Exibir o IIE no dashboard
-- [ ] Criar histórico de indicadores
-- [ ] Criar relatórios de infraestrutura
-- [ ] Criar alertas visuais no dashboard
-
-### 7. Testes
-
-- [ ] Criar testes unitários com Pytest
-- [ ] Testar endpoints com Postman
-- [ ] Testar autenticação
-- [ ] Testar integração com PostgreSQL
-- [ ] Testar integração entre frontend e backend
-- [ ] Testar coleta do agente
-- [ ] Testar geração de indicadores
-- [ ] Realizar testes funcionais
-
-### 8. Ambiente de validação
-
-- [ ] Configurar Hyper-V
-- [ ] Criar máquinas virtuais
-- [ ] Configurar Windows Server
-- [ ] Preparar ambiente educacional simulado
-- [ ] Instalar agente nos computadores simulados
-- [ ] Validar coleta e envio das métricas
-
-### 9. Finalização
-
-- [ ] Revisar código
-- [ ] Revisar segurança
-- [ ] Revisar documentação
-- [ ] Registrar evidências com screenshots
-- [ ] Atualizar diagramas
-- [ ] Atualizar README
-- [ ] Finalizar documentação acadêmica
-- [ ] Preparar apresentação do projeto
-- [ ] Finalizar versão MVP
-
-##  Arquitetura resumida
-
-```text
-Computadores dos laboratórios
-            ↓
-     Agente Python
-         (psutil)
-            ↓
-           JSON
-            ↓
-       FastAPI / API
-            ↓
-       PostgreSQL
-            ↓
-     React / Dashboard
-            ↓
- Equipe de TI / Gestores
+```powershell
+cd backend
+python -m pytest -q
 ```
 
-##  Funcionalidades previstas
+Os testes criam dados **apenas em bancos temporários isolados**. Não modificam a sua instância principal ou o Supabase.
 
-- Gerenciamento de laboratórios
-- Gerenciamento de computadores
-- Monitoramento de recursos
-- Histórico de métricas
-- Dashboard
-- Alertas
-- Indicadores
-- Índice de Infraestrutura Educacional
-- Relatórios
-- Autenticação e controle de acesso
+## Regras e papéis
 
-##  Status do projeto
+| Operação | admin | tecnico | gestor |
+|---|---:|---:|---:|
+| Consultar laboratórios/computadores/painel | Sim | Sim | Sim |
+| Criar/editar laboratórios | Sim | Sim | Não |
+| Excluir laboratórios vazios | Sim | Não | Não |
+| Criar/editar/excluir computadores | Sim | Sim | Não |
+| Administrar usuários e consultar auditoria | Sim | Não | Não |
 
-> Em desenvolvimento.
 
-O projeto encontra-se na etapa de estruturação e implementação inicial do frontend, backend e ambiente de desenvolvimento.
+## Próxima versão
 
-## Projeto acadêmico
-
-Projeto desenvolvido como parte do **Projeto Final de Curso em Engenharia de Software**.
-
-**Projeto:** EDU-Infra Analytics  
-**Curso:** Bacharelado em Engenharia de Software  
-**Instituição:** Universidade de Mogi das Cruzes (UMC)
-
----
-
-> Este README será atualizado conforme o desenvolvimento do projeto avançar.
+Primeiro adicionar ingestão autenticada por dispositivo, séries históricas reais, estado derivado de `last_seen_at`, alertas e coleta automática com psutil. Depois a especialização educacional (atividades/requisitos), testes de aderência e proposta fundamentada do IIE. Não afirmar que módulos planejados já foram entregues.
