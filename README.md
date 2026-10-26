@@ -77,6 +77,16 @@ Os testes criam dados **apenas em bancos temporários isolados**. Não modificam
 | Criar/editar/excluir computadores | Sim | Sim | Não |
 | Administrar usuários e consultar auditoria | Sim | Não | Não |
 
+## Estrutura
+
+- `backend/app/`: schemas, persistência, autenticação, endpoints e regras.
+- `backend/alembic/`: migrações de esquema sem seed.
+- `backend/tests/`: cenários pytest com SQLite separado.
+- `frontend/src/`: interface independente React/CSS.
+- `docs/ESCOPO_E_REQUISITOS.md`: matriz completa RF01–RF18 e propostas RF19–RF26.
+- `docs/REVISAO_MONOGRAFIA_V2.md`: relatório de atualização da monografia, seção por seção.
+- `docs/CRONOGRAMA_SEIS_SEMANAS.md`: plano até a defesa.
+- `docs/FERRAMENTAS_TECH_STACK.md`: como integrar ferramentas e fluxo de trabalho.
 
 ## Próxima versão
 
