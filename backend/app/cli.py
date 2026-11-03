@@ -3,6 +3,9 @@ import argparse
 from getpass import getpass
 
 from sqlalchemy import func, select
+from pydantic import ValidationError
+
+from .schemas import UserCreate
 from sqlalchemy.orm import Session
 
 from .db import get_engine
@@ -22,9 +25,13 @@ def main():
         email = input("E-mail: ").strip().lower()
         password = getpass("Senha (mínimo 12 caracteres): ")
         confirmation = getpass("Confirmar senha: ")
-        if len(name) < 2 or "@" not in email or len(password) < 12 or password != confirmation:
-            raise SystemExit("Dados inválidos ou senhas diferentes.")
-        db.add(User(name=name, email=email, password_hash=hash_password(password), role="admin"))
+        if password != confirmation:
+            raise SystemExit("As senhas informadas são diferentes.")
+        try:
+            validated = UserCreate(name=name, email=email, password=password, role="admin")
+        except ValidationError as exc:
+            raise SystemExit("Nome, e-mail ou senha inválidos. Confira os requisitos de cadastro.") from exc
+        db.add(User(name=validated.name.strip(), email=str(validated.email).lower(), password_hash=hash_password(password), role="admin"))
         db.commit()
         print("Primeiro administrador criado. Nenhum dado de demonstração foi inserido.")
 

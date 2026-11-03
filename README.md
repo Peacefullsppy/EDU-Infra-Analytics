@@ -1,6 +1,6 @@
-# EDU-Infra Analytics — reconstrução autoral desde zero
+# EDU-Infra Analytics — cadastros aprimorados (02/11/2026)
 
-Nova base independente, criada após **auditoria** da monografia V2 e do ZIP fornecido. Não foram reaproveitados componentes React, layouts do Figma, scripts de seed, imagens ou módulos Python anteriores. Nenhum computador ou laboratório é cadastrado automaticamente.
+**Proveniência:** este projeto foi fornecido originalmente no ZIP `EDU_Infra_Analytics_V0.1(3).zip` e foi corrigido, testado e documentado nesta entrega, conforme a monografia UMC anexada. O termo *greenfield* descreve a abordagem de arquitetura do projeto; este pacote não afirma ter sido reescrito novamente sem partir do ZIP. Nenhum computador ou laboratório é cadastrado automaticamente. Confira `README_ENTREGA_SEMANA1.md` para evidências e limitações.
 
 ## O que já funciona (v0.1)
 
@@ -11,9 +11,12 @@ Nova base independente, criada após **auditoria** da monografia V2 e do ZIP for
 - Dados reais consultados diretamente do banco. Sem métricas inventadas, seed, data fixa, gráfico fictício ou IIE fabricado.
 - Dashboard, indicadores, alertas derivados de medições existentes, resumo, privacidade, gestão de usuários e auditoria.
 - Migração inicial Alembic que cria esquema **vazio**; PostgreSQL/Supabase como destino da demonstração e SQLite local explícito.
-- Sete testes backend automatizados (em 20/10/2026).
+- **28 testes backend automatizados aprovados** nesta revisão (02/11/2026); migração 0002 verificada em SQLite temporário.
+- Laboratórios repetidos (mesmo nome/localização) retornam HTTP 409, inclusive durante edição.
+- Busca por nome/localização e situação de laboratórios; busca por hostname e laboratório na API; filtro de laboratórios na interface.
+- Ver detalhes, limites e justificativas em `docs/08_APRIMORAMENTOS_ETAPA_CADASTROS.md`.
 
-**Ainda não implementado:** agente de telemetria/psutil, ingestão de métricas, histórico temporal, cálculo validado do IIE, módulo educacional, relatórios exportáveis, ViaCEP e implantação Hyper-V. Ver cronograma em `docs/`.
+**Ainda não implementado:** agente psutil, ingestão de métricas, histórico temporal, cálculo validado do IIE, relatórios exportáveis e implantação Hyper-V. **ViaCEP e módulo de atividade acadêmica não fazem parte do MVP delimitado na monografia UMC fornecida**; eventuais propostas anteriores permanecem somente como histórico, sem autorização para implementação. Consulte `docs/01_AUDITORIA_MONOGRAFIA_E_V2.md`.
 
 ## Instalação e execução — Windows PowerShell
 
@@ -38,6 +41,8 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
 Cole a saída em `JWT_SECRET_KEY=` dentro de `.env`, **sem registrar essa chave no GitHub**. O arquivo `.env.example` usa SQLite local explicitamente para facilitar o primeiro uso. Para PostgreSQL/Supabase, substitua `DATABASE_URL` por uma string de conexão PostgreSQL com `psycopg`. Confirme os parâmetros pelo painel Connect do seu Supabase, sem expor a senha.
 
 ```powershell
+# Para banco antigo: confira duplicidades antes de aplicar a nova migração.
+python -m scripts.check_duplicate_labs
 python -m alembic upgrade head
 python -m app.cli create-admin
 python -m uvicorn app.main:app --reload
@@ -65,7 +70,7 @@ cd backend
 python -m pytest -q
 ```
 
-Os testes criam dados **apenas em bancos temporários isolados**. Não modificam a sua instância principal ou o Supabase.
+Os testes criam dados **apenas em bancos temporários isolados**. Não modificam a sua instância principal ou o Supabase. A sintaxe JSX foi verificada; o build do Vite ainda precisa ser executado após instalar as dependências, já que a tentativa de instalação offline não pôde ser concluída.
 
 ## Regras e papéis
 
@@ -83,11 +88,12 @@ Os testes criam dados **apenas em bancos temporários isolados**. Não modificam
 - `backend/alembic/`: migrações de esquema sem seed.
 - `backend/tests/`: cenários pytest com SQLite separado.
 - `frontend/src/`: interface independente React/CSS.
-- `docs/ESCOPO_E_REQUISITOS.md`: matriz completa RF01–RF18 e propostas RF19–RF26.
-- `docs/REVISAO_MONOGRAFIA_V2.md`: relatório de atualização da monografia, seção por seção.
+- `docs/02_REQUISITOS_RF_RNF_RN.md`: matriz vigente de requisitos alinhada à monografia UMC.
+- `docs/ESCOPO_E_REQUISITOS.md`: referência histórica de propostas anteriores; não representa o escopo vigente.
+- `docs/REVISAO_MONOGRAFIA_V2.md`: notas históricas sobre a V2 não anexada; use a auditoria atual `docs/01_AUDITORIA_MONOGRAFIA_E_V2.md`.
 - `docs/CRONOGRAMA_SEIS_SEMANAS.md`: plano até a defesa.
 - `docs/FERRAMENTAS_TECH_STACK.md`: como integrar ferramentas e fluxo de trabalho.
 
 ## Próxima versão
 
-Primeiro adicionar ingestão autenticada por dispositivo, séries históricas reais, estado derivado de `last_seen_at`, alertas e coleta automática com psutil. Depois a especialização educacional (atividades/requisitos), testes de aderência e proposta fundamentada do IIE. Não afirmar que módulos planejados já foram entregues.
+Primeiro adicionar ingestão autenticada por dispositivo, séries históricas reais, estado derivado de `last_seen_at`, alertas e coleta automática com psutil. Depois desenvolver histórico, indicadores/relatórios, validação do IIE e demonstração em Hyper-V/Windows Server, conforme a monografia UMC. Atividades acadêmicas exigiriam alteração formal de escopo. Não afirmar que módulos planejados já foram entregues.

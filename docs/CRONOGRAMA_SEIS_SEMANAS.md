@@ -12,9 +12,9 @@ Configurar Supabase/PostgreSQL, migrations Alembic e CORS do ambiente de demonst
 
 Implementar agente Python/psutil numa VM/dispositivo controlado; cadastrar credencial individual de equipamento; endpoint autenticado de ingestão; tabela `MetricSample`; atualização de `last_seen_at`; alerta por limiares e janela de ausência de coleta. Testar com 1–2 equipamentos reais e explicar método de medição.
 
-## Semana 4 — 09 a 15/11 | Diferencial educacional
+## Semana 4 — 09 a 15/11 | Indicadores, IIE e diagnóstico educacional da infraestrutura
 
-Criar entidades `EducationalActivity`, `TechnologyRequirement` e ligação laboratório/atividade; permitir cadastrar requisito mínimo (ex. armazenamento e RAM disponível); implementar avaliação de adequação verificável com dados reais/inventário; registrar critérios de validação IIE com orientador. Não fabricar pontuação para cumprir cronograma.
+Implementar e validar o Índice de Infraestrutura Educacional (IIE) **somente após definir a metodologia com o orientador**, a partir de indicadores técnicos documentados; consolidar disponibilidade, condição dos laboratórios, classificação de estados e alertas reais. A monografia não prevê cadastro de disciplinas, turmas ou atividades acadêmicas no MVP, portanto não criar `EducationalActivity` nem `TechnologyRequirement` como requisito desta etapa. Não fabricar pontuação para cumprir cronograma.
 
 ## Semana 5 — 16 a 22/11 | Relatórios, testes e infraestrutura
 
@@ -26,8 +26,12 @@ Finalizar diagramas e seções de implementação/resultados, matriz RF↔teste,
 
 ## Caminho crítico
 
-**Banco → CRUD → autenticação/perfis → agente/telemetria → contexto educacional → evidências de validação → monografia.** Evitar gastar as primeiras semanas aperfeiçoando apenas CSS ou reconstruindo Figma visualmente.
+**Banco → CRUD → autenticação/perfis → agente/telemetria → indicadores/IIE validado → evidências de validação → monografia.** Evitar gastar as primeiras semanas aperfeiçoando apenas CSS ou reconstruindo Figma visualmente.
 
 ## Plano de contingência caso o cronograma atrase
 
-Prioridade absoluta: CRUD+RBAC+logs+PostgreSQL+testes+agente real em um computador+relação atividade/requisito. Se faltar tempo, cortar integrações ornamentais, animações, ViaCEP e relatórios PDF avançados. Na monografia, registrar de forma explícita o que ficou planejado em vez de simular a entrega.
+Prioridade absoluta: CRUD+RBAC+logs+PostgreSQL+testes+agente real em um computador+indicadores baseados em métricas reais+IIE metodologicamente justificado. Se faltar tempo, priorizar resumo verificável antes de exportações ornamentais ou animações, e registrar qualquer critério de IIE que permaneça sem validação. Na monografia, registrar de forma explícita o que ficou planejado em vez de simular a entrega.
+
+## Registro de revisão em 02/11/2026
+
+A primeira etapa recebeu uma melhoria pontual de integridade dos cadastros (laboratórios duplicados), buscas e tratamento de consulta, com 28 testes pytest aprovados e migração adicional confirmada em SQLite. A execução real em PostgreSQL/Supabase e o build do frontend permanecem pendentes de validação. Esse ajuste **não substitui** a coleta de métricas prevista para a terceira semana nem altera a necessidade de definir o IIE com o orientador.

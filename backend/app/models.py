@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -23,12 +23,14 @@ class User(Base):
 
 class Laboratory(Base):
     __tablename__ = "laboratories"
+    # Um mesmo ambiente não pode ter dois cadastros, mesmo com letras maiúsculas/minúsculas.
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     location: Mapped[str] = mapped_column(String(160), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     computers: Mapped[list["Computer"]] = relationship(back_populates="laboratory", passive_deletes=True)
+    __table_args__ = (Index("uq_laboratories_name_location_ci", func.lower(name), func.lower(location), unique=True),)
 
 
 class Computer(Base):

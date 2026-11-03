@@ -1,0 +1,23 @@
+ID,Tipo,Tarefa,Semana,Prioridade,Status,Criterio de aceite,Evidencia
+AUD-01,Auditoria,Auditar monografia UMC e notas V2,1,P0,Concluído,Distinguir escopo obrigatório de propostas V2,docs/01_AUDITORIA_MONOGRAFIA_E_V2.md
+REQ-01,Documentação,Mapear RF/RNF/RN e critérios de aceite,1,P0,Concluído,Cada requisito com referência e status,docs/02_REQUISITOS_RF_RNF_RN.md
+ARQ-01,Arquitetura,Arquitetura e DER greenfield,1,P0,Concluído,Componentes/entidades/decisões rastreáveis,docs/03_ARQUITETURA_GREENFIELD.md
+DB-01,Banco,Inicializar esquema vazio com Alembic,1,P0,Concluído,Quatro tabelas sem linhas após upgrade,evidencias/01_banco_vazio.png
+DB-02,Banco,Confirmar Alembic com PostgreSQL,2,P0,A fazer,Migração em Postgres real e SELECT COUNT,docs/04_PROCEDIMENTO_VALIDACAO.md
+AUTH-01,Segurança,Bootstrap manual do primeiro admin,1,P0,Concluído,Senha Argon2 e sem registros fictícios,app.cli + evidencias/resultado_evidencias.json
+AUTH-02,Segurança,Autenticação JWT e RBAC,1,P0,Concluído,401 e 403 e acesso apropriado,backend/tests/
+LAB-01,API,CRUD laboratórios,1,P0,Concluído,GET/POST/PUT/DELETE e logs,backend/tests/
+LAB-02,Regra,DELETE lab ocupado retorna 409,1,P0,Concluído,Sem exclusão de lab ou PC associado,evidencias/03_conflito_http_409.png
+PC-01,API,CRUD computadores,1,P0,Concluído,GET/POST/PUT/DELETE e vínculo válido,backend/tests/
+LOG-01,Auditoria,Registrar operações autenticadas,1,P0,Concluído,Logs de login e alterações,backend/tests/
+WEB-01,Frontend,React sem mocks e com estados vazios,1,P0,Implementado não validado por build,Fetch real e sem valores simulados,frontend/src/App.jsx
+WEB-02,Frontend,Validar npm build e screenshots React,2,P0,A fazer,Build verde e evidências em navegador,docs/04_PROCEDIMENTO_VALIDACAO.md
+TEST-01,Testes,Executar sete ou mais pytest,1,P0,Concluído,19 testes passam,evidencias/pytest_19_testes.txt
+EVID-01,Evidências,Capturas de consultas SQL e cadastros via API,1,P0,Concluído,Contagens zero POST 201 e DELETE 409,evidencias/resultado_evidencias.json
+GIT-01,Git,Registrar commits locais e exportar histórico,1,P1,Concluído,Git bundle e git log no pacote externo,evidencias/git_log_local.txt
+GIT-02,Git,Publicar commits no repositório pessoal,2,P1,A fazer,Push ou PR sem sobrescrever histórico remoto,docs/05_COMMITS_E_EXECUCAO.md
+MON-01,Monitoramento,Agente psutil e ingestão de métricas,3,P0,A fazer,Medições reais por computador,Fase posterior
+IIE-01,Indicadores,Definir e validar metodologia IIE,4,P0,A fazer,Fórmula documentada aprovada e testada,Fase posterior
+REP-01,Relatórios,Histórico de métricas e relatórios,5,P1,A fazer,Consulta temporal verificável,Fase posterior
+VM-01,Infraestrutura,Validar no Hyper-V e Windows Server,5,P1,A fazer,Demonstração em ambiente virtualizado,Fase posterior
+TCC-01,Monografia,Revisar resultados e conclusões conforme evidências,6,P0,A fazer,Não declarar recursos não testados,Fase posterior

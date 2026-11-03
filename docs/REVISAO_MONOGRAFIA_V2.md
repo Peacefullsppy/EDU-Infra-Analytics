@@ -1,3 +1,7 @@
+> **DOCUMENTO HISTÓRICO, NÃO NORMATIVO (02/11/2026):** contém propostas derivadas de outra versão da monografia (V2, 26 páginas), que não foi anexada nesta rodada. A monografia UMC de 24 páginas enviada em 02/11/2026 é a referência prioritária. Propostas de ViaCEP, atividades acadêmicas e adequação curricular não pertencem ao MVP descrito na seção 1.4 do documento UMC. Para o backlog vigente use `02_REQUISITOS_RF_RNF_RN.md` e para a auditoria use `01_AUDITORIA_MONOGRAFIA_E_V2.md`.
+
+---
+
 # Parecer de revisão completa — monografia V2 (26 páginas)
 
 **Natureza:** diagnóstico e proposta de reescrita. A V2 não deve ser entregue como descrição do novo software sem passar por atualização e verificação de evidências. As decisões aqui propostas aguardam validação do autor e do orientador.

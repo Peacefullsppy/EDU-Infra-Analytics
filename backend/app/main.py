@@ -1,6 +1,6 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import func, select
+from sqlalchemy import func, select, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -12,7 +12,7 @@ from .schemas import (ComputerInput, ComputerRead, LaboratoryInput, LaboratoryRe
 from .security import current_user, hash_password, issue_token, password_matches, roles
 from .settings import get_settings
 
-app = FastAPI(title="EDU-Infra Analytics — API nova", version="0.1.0", description="Base autoral de reconstrução; banco sem dados de demonstração")
+app = FastAPI(title="EDU-Infra Analytics — API", version="0.1.2", description="Sistema para diagnóstico da infraestrutura tecnológica escolar; sem dados de demonstração")
 app.add_middleware(CORSMiddleware, allow_origins=get_settings()["cors_origins"], allow_credentials=True, allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"], allow_headers=["Authorization", "Content-Type"])
 
 
@@ -37,6 +37,25 @@ def pc_or_404(db: Session, pc_id: int) -> Computer:
 
 def unique_conflict(exc: IntegrityError):
     raise HTTPException(409, "Registro duplicado ou referência inválida") from exc
+
+
+def lab_conflict(exc: IntegrityError):
+    raise HTTPException(409, "Já existe laboratório com esse nome e localização") from exc
+
+
+def search_term(value: str) -> str:
+    # % e _ são letras de busca aqui, não atalhos internos do SQL.
+    clean = value.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{clean}%"
+
+
+def check_lab_duplicate(db: Session, name: str, location: str, current_id: int | None = None):
+    # Complementa o índice UNIQUE: o lower() do SQLite não trata todas as letras
+    # acentuadas, enquanto o casefold() do Python cobre a escrita usual em português.
+    name_key, location_key = name.casefold(), location.casefold()
+    for lab_id, lab_name, lab_location in db.execute(select(Laboratory.id, Laboratory.name, Laboratory.location)):
+        if lab_id != current_id and lab_name.casefold() == name_key and lab_location.casefold() == location_key:
+            raise HTTPException(409, "Já existe laboratório com esse nome e localização")
 
 
 @app.get("/health")
@@ -101,17 +120,33 @@ def set_user_state(user_id: int, payload: UserState, db: Session = Depends(get_d
 
 
 @app.get("/api/v1/laboratorios", response_model=list[LaboratoryRead])
-def list_labs(db: Session = Depends(get_db), user: User = Depends(current_user)):
-    return [lab_data(l, db) for l in db.scalars(select(Laboratory).order_by(Laboratory.id)).all()]
+def list_labs(
+    busca: str | None = Query(default=None, max_length=100),
+    ativo: bool | None = None,
+    db: Session = Depends(get_db),
+    user: User = Depends(current_user),
+):
+    query = select(Laboratory)
+    if busca and busca.strip():
+        term = search_term(busca)
+        query = query.where(or_(Laboratory.name.ilike(term, escape="\\"), Laboratory.location.ilike(term, escape="\\")))
+    if ativo is not None:
+        query = query.where(Laboratory.is_active == ativo)
+    return [lab_data(l, db) for l in db.scalars(query.order_by(Laboratory.id)).all()]
 
 
 @app.post("/api/v1/laboratorios", response_model=LaboratoryRead, status_code=201)
 def add_lab(payload: LaboratoryInput, db: Session = Depends(get_db), user: User = Depends(roles("admin", "tecnico"))):
+    check_lab_duplicate(db, payload.name, payload.location)
     lab = Laboratory(**payload.model_dump())
     db.add(lab)
-    db.flush()
-    audit(db, user.id, "CREATE", "laboratory", lab.id)
-    db.commit()
+    try:
+        db.flush()
+        audit(db, user.id, "CREATE", "laboratory", lab.id)
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        lab_conflict(exc)
     db.refresh(lab)
     return lab_data(lab, db)
 
@@ -124,10 +159,15 @@ def get_lab(lab_id: int, db: Session = Depends(get_db), user: User = Depends(cur
 @app.put("/api/v1/laboratorios/{lab_id}", response_model=LaboratoryRead)
 def update_lab(lab_id: int, payload: LaboratoryInput, db: Session = Depends(get_db), user: User = Depends(roles("admin", "tecnico"))):
     lab = lab_or_404(db, lab_id)
+    check_lab_duplicate(db, payload.name, payload.location, current_id=lab_id)
     for key, value in payload.model_dump().items():
         setattr(lab, key, value)
-    audit(db, user.id, "UPDATE", "laboratory", lab.id)
-    db.commit()
+    try:
+        audit(db, user.id, "UPDATE", "laboratory", lab.id)
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        lab_conflict(exc)
     db.refresh(lab)
     return lab_data(lab, db)
 
@@ -137,17 +177,30 @@ def delete_lab(lab_id: int, db: Session = Depends(get_db), user: User = Depends(
     lab = lab_or_404(db, lab_id)
     if db.scalar(select(func.count(Computer.id)).where(Computer.laboratory_id == lab_id)):
         raise HTTPException(409, "Transfira ou exclua os computadores antes de excluir o laboratório")
-    db.delete(lab)
-    audit(db, user.id, "DELETE", "laboratory", lab_id)
-    db.commit()
+    try:
+        db.delete(lab)
+        audit(db, user.id, "DELETE", "laboratory", lab_id)
+        db.commit()
+    except IntegrityError as exc:
+        # A restrição do banco também protege se outro usuário vincular um PC
+        # depois da contagem inicial, mas antes da exclusão ser concluída.
+        db.rollback()
+        raise HTTPException(409, "O laboratório possui computadores vinculados") from exc
 
 
 @app.get("/api/v1/computadores", response_model=list[ComputerRead])
-def list_pcs(laboratory_id: int | None = None, db: Session = Depends(get_db), user: User = Depends(current_user)):
-    q = select(Computer).order_by(Computer.id)
+def list_pcs(
+    laboratory_id: int | None = Query(default=None, gt=0),
+    busca: str | None = Query(default=None, max_length=100),
+    db: Session = Depends(get_db),
+    user: User = Depends(current_user),
+):
+    query = select(Computer)
     if laboratory_id is not None:
-        q = q.where(Computer.laboratory_id == laboratory_id)
-    return [serialize_computer(pc) for pc in db.scalars(q).all()]
+        query = query.where(Computer.laboratory_id == laboratory_id)
+    if busca and busca.strip():
+        query = query.where(Computer.hostname.ilike(search_term(busca), escape="\\"))
+    return [serialize_computer(pc) for pc in db.scalars(query.order_by(Computer.id)).all()]
 
 
 @app.post("/api/v1/computadores", response_model=ComputerRead, status_code=201)

@@ -37,7 +37,7 @@ def dashboard_summary(db: Session) -> dict:
     return {
         "laboratories": db.scalar(select(func.count(Laboratory.id))) or 0,
         "computers": summary,
-        "availability_percent": round(summary["online"] / measured * 100, 1) if measured else None,
+        "availability_percent": round((summary["online"] + summary["atencao"] + summary["critico"]) / measured * 100, 1) if measured else None,
         "iie": None,
         "iie_status": "nao_definido",
     }

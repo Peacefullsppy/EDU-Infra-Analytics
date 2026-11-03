@@ -31,6 +31,7 @@ function useLoad(loader, deps = []) {
   useEffect(() => {
     let current = true;
     setError('');
+    setData(null); // Nunca manter cadastros antigos na tela quando uma nova consulta falhar.
     loader().then(value => current && setData(value)).catch(err => current && setError(err.message));
     return () => { current = false; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,22 +85,29 @@ function Laboratories({ token, role }) {
   const [editing, setEditing] = useState(null);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('info');
   const [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState('todos');
   const start = lab => { setForm(lab ? { name: lab.name, location: lab.location, is_active: lab.is_active } : initial); setEditing(lab?.id ?? null); setOpen(true); setMessage(''); };
   async function submit(e) {
     e.preventDefault(); setBusy(true); setMessage('');
-    try { await http(`/laboratorios${editing ? `/${editing}` : ''}`, token, { method: editing ? 'PUT' : 'POST', body: JSON.stringify(form) }); setOpen(false); setMessage(editing ? 'Laboratório atualizado.' : 'Laboratório cadastrado.'); reload(); }
-    catch (err) { setMessage(err.message); } finally { setBusy(false); }
+    try { await http(`/laboratorios${editing ? `/${editing}` : ''}`, token, { method: editing ? 'PUT' : 'POST', body: JSON.stringify(form) }); setOpen(false); setMessageType('info'); setMessage(editing ? 'Laboratório atualizado.' : 'Laboratório cadastrado.'); reload(); }
+    catch (err) { setMessageType('error'); setMessage(err.message); } finally { setBusy(false); }
   }
   async function remove(lab) {
     if (!window.confirm(`Excluir definitivamente o laboratório "${lab.name}"? Esta ação será bloqueada se houver computadores vinculados.`)) return;
-    try { await http(`/laboratorios/${lab.id}`, token, { method: 'DELETE' }); setMessage('Laboratório excluído.'); reload(); }
-    catch (err) { setMessage(err.message); }
+    try { await http(`/laboratorios/${lab.id}`, token, { method: 'DELETE' }); setMessageType('info'); setMessage('Laboratório excluído.'); reload(); }
+    catch (err) { setMessageType('error'); setMessage(err.message); }
   }
+  const visibleLabs = (data || []).filter(lab =>
+    (lab.name + ' ' + lab.location).toLocaleLowerCase('pt-BR').includes(search.trim().toLocaleLowerCase('pt-BR')) &&
+    (activeFilter === 'todos' || (activeFilter === 'ativos' ? lab.is_active : !lab.is_active))
+  );
   return <Section title="Laboratórios" subtitle="Cadastro, atualização e exclusão controlada de ambientes." action={canWrite && <button className="button primary" onClick={() => start(null)}>+ Novo laboratório</button>}>
-    <Notice>{message}</Notice><Notice kind="error">{error}</Notice>
+    <Notice kind={messageType}>{message}</Notice><Notice kind="error">{error}</Notice>
     {open && <form className="panel edit-panel" onSubmit={submit}><h3>{editing ? 'Editar laboratório' : 'Cadastrar laboratório'}</h3><div className="fields"><label>Nome do laboratório<input required minLength="2" maxLength="100" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></label><label>Localização<input required minLength="2" maxLength="160" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></label><label className="checkbox-label"><input type="checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })}/> Laboratório ativo</label></div><FormActions editing={editing} cancel={() => setOpen(false)} disabled={busy}/></form>}
-    <div className="panel table-panel">{data?.length ? <div className="table-scroll"><table><thead><tr><th>Laboratório</th><th>Localização</th><th>Situação</th><th>Computadores</th>{canWrite && <th>Ações</th>}</tr></thead><tbody>{data.map(lab => <tr key={lab.id}><td><strong>{lab.name}</strong></td><td>{lab.location}</td><td>{lab.is_active ? 'Ativo' : 'Inativo'}</td><td>{lab.computer_count}</td>{canWrite && <td className="table-actions"><button onClick={() => start(lab)} className="text-button">Editar</button>{role === 'admin' && <button onClick={() => remove(lab)} className="text-button danger">Excluir</button>}</td>}</tr>)}</tbody></table></div> : <Empty label="O banco está vazio. Cadastre o primeiro laboratório para começar." />}</div>
+    <div className="panel table-panel"><div className="toolbar"><input className="search" aria-label="Buscar laboratórios" placeholder="Buscar pelo nome ou localização…" value={search} onChange={e => setSearch(e.target.value)}/><select aria-label="Filtrar situação dos laboratórios" value={activeFilter} onChange={e => setActiveFilter(e.target.value)}><option value="todos">Todos</option><option value="ativos">Ativos</option><option value="inativos">Inativos</option></select><small>{visibleLabs.length} resultado(s)</small></div>{data?.length ? (visibleLabs.length ? <div className="table-scroll"><table><thead><tr><th>Laboratório</th><th>Localização</th><th>Situação</th><th>Computadores</th>{canWrite && <th>Ações</th>}</tr></thead><tbody>{visibleLabs.map(lab => <tr key={lab.id}><td><strong>{lab.name}</strong></td><td>{lab.location}</td><td>{lab.is_active ? 'Ativo' : 'Inativo'}</td><td>{lab.computer_count}</td>{canWrite && <td className="table-actions"><button onClick={() => start(lab)} className="text-button">Editar</button>{role === 'admin' && <button onClick={() => remove(lab)} className="text-button danger">Excluir</button>}</td>}</tr>)}</tbody></table></div> : <Empty label="Nenhum laboratório corresponde aos filtros escolhidos." />) : <Empty label="O banco está vazio. Cadastre o primeiro laboratório para começar." />}</div>
     <p className="hint">Exclusão de laboratório: somente administrador; proibida enquanto existirem computadores associados (RN01).</p>
   </Section>;
 }

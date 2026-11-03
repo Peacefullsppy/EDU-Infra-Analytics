@@ -1,3 +1,7 @@
+> **DOCUMENTO HISTÓRICO, NÃO NORMATIVO (02/11/2026):** contém propostas derivadas de outra versão da monografia (V2, 26 páginas), que não foi anexada nesta rodada. A monografia UMC de 24 páginas enviada em 02/11/2026 é a referência prioritária. Propostas de ViaCEP, atividades acadêmicas e adequação curricular não pertencem ao MVP descrito na seção 1.4 do documento UMC. Para o backlog vigente use `02_REQUISITOS_RF_RNF_RN.md` e para a auditoria use `01_AUDITORIA_MONOGRAFIA_E_V2.md`.
+
+---
+
 # Reconstrução do EDU-Infra Analytics — análise de escopo e rastreabilidade
 
 **Fontes utilizadas apenas para análise:** monografia V2 (26 páginas) e ZIP `EDU-Infra-Analytics-testes-unitarios(1).zip`. **Não** houve reutilização de código, CSS, imagens ou telas do ZIP. O novo repositório não contém arquivo `seed.py` nem dados demonstrativos. **Atualizado em:** 20/10/2026.
