@@ -1,58 +1,63 @@
-# EDU-Infra Analytics — cadastros aprimorados (02/11/2026)
+# EDU-Infra Analytics 1.6
 
-**Proveniência:** este projeto foi fornecido originalmente no ZIP `EDU_Infra_Analytics_V0.1(3).zip` e foi corrigido, testado e documentado nesta entrega, conforme a monografia UMC anexada. O termo *greenfield* descreve a abordagem de arquitetura do projeto; este pacote não afirma ter sido reescrito novamente sem partir do ZIP. Nenhum computador ou laboratório é cadastrado automaticamente. Confira `README_ENTREGA_SEMANA1.md` para evidências e limitações.
+Sistema web para cadastro e diagnóstico técnico de laboratórios e computadores de instituições de ensino. Reúne monitoramento de CPU, RAM e disco, alertas, histórico de medições, indicador experimental IIE, relatórios CSV, inventário Hyper-V, autenticação por perfis e Termos e Condições versionados.
 
-## O que já funciona (v0.1)
+## Tecnologias
 
-- REST FastAPI autenticada via JWT; Argon2; perfil `admin`, `tecnico`, `gestor`.
-- Criação do **primeiro administrador pelo terminal**, com senha digitada e sem credenciais de demonstração.
-- CRUD de laboratórios e computadores (API e telas React), RBAC e logs de auditoria.
-- Exclusão de laboratório somente por admin, **proibida** se existirem computadores vinculados. Nenhuma exclusão em cascata de computador.
-- Dados reais consultados diretamente do banco. Sem métricas inventadas, seed, data fixa, gráfico fictício ou IIE fabricado.
-- Dashboard, indicadores, alertas derivados de medições existentes, resumo, privacidade, gestão de usuários e auditoria.
-- Migração inicial Alembic que cria esquema **vazio**; PostgreSQL/Supabase como destino da demonstração e SQLite local explícito.
-- **28 testes backend automatizados aprovados** nesta revisão (02/11/2026); migração 0002 verificada em SQLite temporário.
-- Laboratórios repetidos (mesmo nome/localização) retornam HTTP 409, inclusive durante edição.
-- Busca por nome/localização e situação de laboratórios; busca por hostname e laboratório na API; filtro de laboratórios na interface.
-- Ver detalhes, limites e justificativas em `docs/08_APRIMORAMENTOS_ETAPA_CADASTROS.md`.
+- Backend: Python 3.13, FastAPI, SQLAlchemy, Alembic e PostgreSQL.
+- Frontend: React, Vite e JavaScript.
+- Monitoramento: agente Python com `psutil` e `httpx`.
+- Virtualização: Hyper-V e scripts PowerShell.
+- Testes: Pytest, TestClient, PostgreSQL descartável e Playwright (E2E de navegador).
 
-**Ainda não implementado:** agente psutil, ingestão de métricas, histórico temporal, cálculo validado do IIE, relatórios exportáveis e implantação Hyper-V. **ViaCEP e módulo de atividade acadêmica não fazem parte do MVP delimitado na monografia UMC fornecida**; eventuais propostas anteriores permanecem somente como histórico, sem autorização para implementação. Consulte `docs/01_AUDITORIA_MONOGRAFIA_E_V2.md`.
+## Organização
 
-## Instalação e execução — Windows PowerShell
+```text
+backend/app/       API, modelos, validações e serviços
+backend/alembic/    Migrações de banco
+backend/tests/      Testes unitários, integração e jornadas E2E
+frontend/src/      Interface e comunicação HTTP
+agent/             Agente de métricas para host ou VM
+hyperv/            Scripts de inventário e agendamento do agente
+infra/             PostgreSQL com Docker Compose
+legal/             Termos, aviso de privacidade e orientações
+.github/workflows/ Integração contínua
+```
 
-Pré-requisitos: Python 3.12+, Node.js com npm, PowerShell e acesso ao registry npm. Ter PostgreSQL/Supabase é necessário para a versão final, mas não para executar a primeira versão em SQLite local.
+## Inicialização (Windows / PowerShell)
 
-### Terminal 1 — backend
+Requisitos: Python 3.13, Node.js 22, Docker Desktop em execução e PowerShell. Mantenha senhas e tokens apenas em arquivos `.env` locais.
+
+**1. Banco de dados**
+
+```powershell
+cd infra
+Copy-Item .env.example .env
+notepad .env
+docker compose --env-file .env -f compose.postgres.yml up -d
+cd ..
+```
+
+**2. API**
 
 ```powershell
 cd backend
-python -m venv .venv
+py -3.13 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 Copy-Item .env.example .env
-```
-
-**Obrigatório:** abra `backend/.env` e substitua `JWT_SECRET_KEY` por uma string aleatória com ao menos 32 caracteres. Para gerar uma no PowerShell, rode:
-
-```powershell
-python -c "import secrets; print(secrets.token_urlsafe(48))"
-```
-
-Cole a saída em `JWT_SECRET_KEY=` dentro de `.env`, **sem registrar essa chave no GitHub**. O arquivo `.env.example` usa SQLite local explicitamente para facilitar o primeiro uso. Para PostgreSQL/Supabase, substitua `DATABASE_URL` por uma string de conexão PostgreSQL com `psycopg`. Confirme os parâmetros pelo painel Connect do seu Supabase, sem expor a senha.
-
-```powershell
-# Para banco antigo: confira duplicidades antes de aplicar a nova migração.
-python -m scripts.check_duplicate_labs
+notepad .env
 python -m alembic upgrade head
+python -m scripts.check_db
 python -m app.cli create-admin
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-Digite nome, e-mail e senha forte no assistente `create-admin`; esse fluxo não cria laboratórios nem computadores. Rotas: `http://127.0.0.1:8000/docs` (OpenAPI) e `http://127.0.0.1:8000/health`.
+Configure `backend/.env` com a senha real do PostgreSQL e uma `JWT_SECRET_KEY` forte. O Compose publica por padrão a porta local `5433`; ajuste `backend/.env` se alterou a porta para evitar conflitos.
 
-**Importante:** execute `create-admin` somente quando não houver usuários. Outras contas são cadastradas na tela de Usuários após autenticar como admin. Para banco local totalmente novo, use outro banco/arquivo e repita as migrações (não apagar dados de trabalho).
+Documentação Swagger: `http://127.0.0.1:8000/docs`. Saúde: `http://127.0.0.1:8000/health`.
 
-### Terminal 2 — frontend
+**3. Interface (novo terminal)**
 
 ```powershell
 cd frontend
@@ -61,39 +66,43 @@ npm install
 npm run dev
 ```
 
-Abra `http://127.0.0.1:5173`, entre com a conta criada no terminal e faça seu **primeiro cadastro real** de laboratório. Em seguida crie um computador associado. O painel mostrará números dos registros cadastrados e o estado `Sem coleta`, pois o agente ainda não está implementado. O IIE aparece `Não calculado`.
+Acesse `http://127.0.0.1:5173`. O usuário precisa aceitar os Termos vigentes após cada login para acessar as funcionalidades.
 
-### Testes
+**4. Agente (no host ou em cada VM, terminal próprio)**
 
 ```powershell
-cd backend
-python -m pytest -q
+cd agent
+py -3.13 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+notepad .env
+python agent.py --once
+python agent.py
 ```
 
-Os testes criam dados **apenas em bancos temporários isolados**. Não modificam a sua instância principal ou o Supabase. A sintaxe JSX foi verificada; o build do Vite ainda precisa ser executado após instalar as dependências, já que a tentativa de instalação offline não pôde ser concluída.
+Configure `EDU_COMPUTER_ID`, `EDU_AGENT_TOKEN` e `EDU_API_URL` com os valores do equipamento cadastrado. Dentro de uma VM, use o HTTPS do host acessível pela rede, não `127.0.0.1` da VM.
 
-## Regras e papéis
+## Testes
 
-| Operação | admin | tecnico | gestor |
-|---|---:|---:|---:|
-| Consultar laboratórios/computadores/painel | Sim | Sim | Sim |
-| Criar/editar laboratórios | Sim | Sim | Não |
-| Excluir laboratórios vazios | Sim | Não | Não |
-| Criar/editar/excluir computadores | Sim | Sim | Não |
-| Administrar usuários e consultar auditoria | Sim | Não | Não |
+Na pasta `backend` com `requirements-dev.txt` instalado:
 
-## Estrutura
+```powershell
+python -m pytest -q
+python -m pytest -q -m unit
+python -m pytest -q -m integration
+python -m pytest -q -m e2e
+python -m pytest --cov=app --cov-report=term-missing
+```
 
-- `backend/app/`: schemas, persistência, autenticação, endpoints e regras.
-- `backend/alembic/`: migrações de esquema sem seed.
-- `backend/tests/`: cenários pytest com SQLite separado.
-- `frontend/src/`: interface independente React/CSS.
-- `docs/02_REQUISITOS_RF_RNF_RN.md`: matriz vigente de requisitos alinhada à monografia UMC.
-- `docs/ESCOPO_E_REQUISITOS.md`: referência histórica de propostas anteriores; não representa o escopo vigente.
-- `docs/REVISAO_MONOGRAFIA_V2.md`: notas históricas sobre a V2 não anexada; use a auditoria atual `docs/01_AUDITORIA_MONOGRAFIA_E_V2.md`.
-- `docs/CRONOGRAMA_SEIS_SEMANAS.md`: plano até a defesa.
-- `docs/FERRAMENTAS_TECH_STACK.md`: como integrar ferramentas e fluxo de trabalho.
+Testes que dependem de um PostgreSQL real exigem **um banco descartável e autorização explícita**; testes de navegador exigem frontend/backend de teste ativos, Playwright e banco SQLite descartável. A CI provisiona os ambientes isolados. Instruções e limites: [`docs/TESTES.md`](docs/TESTES.md).
 
-## Próxima versão
+## Documentação
 
-Primeiro adicionar ingestão autenticada por dispositivo, séries históricas reais, estado derivado de `last_seen_at`, alertas e coleta automática com psutil. Depois desenvolver histórico, indicadores/relatórios, validação do IIE e demonstração em Hyper-V/Windows Server, conforme a monografia UMC. Atividades acadêmicas exigiriam alteração formal de escopo. Não afirmar que módulos planejados já foram entregues.
+- [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md): componentes, fluxo de dados e responsabilidades.
+- [`docs/TESTES.md`](docs/TESTES.md): estratégia, execução local, CI e E2E.
+- [`docs/RESULTADOS_TESTES.md`](docs/RESULTADOS_TESTES.md): resultados verificáveis e limites da avaliação.
+- [`legal/GUIA_PUBLICACAO_LGPD.md`](legal/GUIA_PUBLICACAO_LGPD.md): requisitos jurídicos e operacionais antes da implantação.
+
+O IIE é um indicador heurístico de infraestrutura, não uma medida de aprendizagem. Os Termos e o Aviso de Privacidade são minutas que exigem adaptação e revisão para uso institucional real.
+
