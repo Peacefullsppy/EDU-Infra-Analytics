@@ -1,1 +1,1 @@
-"""EDU-Infra Analytics — backend reconstruído sem herança de código anterior."""
+"""EDU-Infra Analytics: API educacional de infraestrutura, reescrita do zero."""

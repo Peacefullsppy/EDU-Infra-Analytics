@@ -105,4 +105,3 @@ Testes que dependem de um PostgreSQL real exigem **um banco descartável e autor
 - [`legal/GUIA_PUBLICACAO_LGPD.md`](legal/GUIA_PUBLICACAO_LGPD.md): requisitos jurídicos e operacionais antes da implantação.
 
 O IIE é um indicador heurístico de infraestrutura, não uma medida de aprendizagem. Os Termos e o Aviso de Privacidade são minutas que exigem adaptação e revisão para uso institucional real.
-

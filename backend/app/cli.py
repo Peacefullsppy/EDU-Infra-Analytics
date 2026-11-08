@@ -1,39 +1,35 @@
-"""Criação explícita do primeiro usuário; nunca insere laboratório ou computador fictício."""
+"""Gerenciamento via CLI. Nunca semeia administradores com senhas estáticas."""
 import argparse
 from getpass import getpass
-
-from sqlalchemy import func, select
-from pydantic import ValidationError
-
-from .schemas import UserCreate
-from sqlalchemy.orm import Session
-
-from .db import get_engine
+from sqlalchemy import select
+from .core import SessionLocal, hash_password
 from .models import User
-from .security import hash_password
+
+
+def create_admin():
+    name = input("Nome do administrador: ").strip()
+    email = input("E-mail do administrador: ").strip().lower()
+    password = getpass("Senha (mín. 12 caracteres): ")
+    if len(name) < 2 or "@" not in email:
+        raise SystemExit("Nome ou e-mail inválido")
+    try:
+        hashed = hash_password(password)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    with SessionLocal() as db:
+        if db.scalar(select(User.id).where(User.email == email)):
+            raise SystemExit("E-mail já cadastrado")
+        db.add(User(name=name, email=email, password_hash=hashed, role="ADMIN"))
+        db.commit()
+        print("Administrador criado com sucesso")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Bootstrap seguro de administrador")
-    parser.add_argument("create-admin", choices=["create-admin"])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command", choices=["create-admin"])
     args = parser.parse_args()
-    with Session(get_engine()) as db:
-        existing = db.scalar(select(func.count(User.id))) or 0
-        if existing > 0:
-            raise SystemExit("Já existe usuário. Crie outros pelo painel administrativo.")
-        name = input("Nome completo: ").strip()
-        email = input("E-mail: ").strip().lower()
-        password = getpass("Senha (mínimo 12 caracteres): ")
-        confirmation = getpass("Confirmar senha: ")
-        if password != confirmation:
-            raise SystemExit("As senhas informadas são diferentes.")
-        try:
-            validated = UserCreate(name=name, email=email, password=password, role="admin")
-        except ValidationError as exc:
-            raise SystemExit("Nome, e-mail ou senha inválidos. Confira os requisitos de cadastro.") from exc
-        db.add(User(name=validated.name.strip(), email=str(validated.email).lower(), password_hash=hash_password(password), role="admin"))
-        db.commit()
-        print("Primeiro administrador criado. Nenhum dado de demonstração foi inserido.")
+    if args.command == "create-admin":
+        create_admin()
 
 
 if __name__ == "__main__":

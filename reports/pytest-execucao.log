@@ -1,0 +1,39 @@
+sssssssss............................................................... [ 19%]
+.......................................................ssssss........... [ 38%]
+...........................s............................................ [ 57%]
+........................................................................ [ 76%]
+........................................................................ [ 95%]
+.................                                                        [100%]
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.5-final-0 ________________
+
+Name              Stmts   Miss  Cover   Missing
+-----------------------------------------------
+app/__init__.py       0      0   100%
+app/cli.py           29      6    79%   28-32, 36
+app/core.py         111      9    92%   41-43, 60-61, 119, 130-131, 156
+app/main.py          28      7    75%   16, 27-32
+app/models.py       112      0   100%
+app/routes.py       368     20    95%   91, 93, 115, 139, 147, 155-158, 203, 244-245, 259-261, 300-301, 467-469
+app/schemas.py      137      1    99%   80
+app/services.py      67      1    99%   53
+-----------------------------------------------
+TOTAL               852     44    95%
+Coverage XML written to file coverage.xml
+=========================== short test summary info ============================
+SKIPPED [1] tests/e2e/test_browser_user_flows.py:45: E2E navegador só é executado contra banco descartável configurado
+SKIPPED [1] tests/e2e/test_browser_user_flows.py:53: E2E navegador só é executado contra banco descartável configurado
+SKIPPED [1] tests/e2e/test_browser_user_flows.py:61: E2E navegador só é executado contra banco descartável configurado
+SKIPPED [1] tests/e2e/test_browser_user_flows.py:69: E2E navegador só é executado contra banco descartável configurado
+SKIPPED [1] tests/e2e/test_browser_user_flows.py:79: E2E navegador só é executado contra banco descartável configurado
+SKIPPED [1] tests/e2e/test_browser_user_flows.py:93: E2E navegador só é executado contra banco descartável configurado
+SKIPPED [1] tests/e2e/test_browser_user_flows.py:115: E2E navegador só é executado contra banco descartável configurado
+SKIPPED [1] tests/e2e/test_browser_user_flows.py:125: E2E navegador só é executado contra banco descartável configurado
+SKIPPED [1] tests/e2e/test_browser_user_flows.py:134: E2E navegador só é executado contra banco descartável configurado
+SKIPPED [2] tests/integration/test_postgres_contracts.py:27: Exige PostgreSQL descartável explicitamente autorizado
+SKIPPED [1] tests/integration/test_postgres_contracts.py:42: Exige PostgreSQL descartável explicitamente autorizado
+SKIPPED [1] tests/integration/test_postgres_contracts.py:53: Exige PostgreSQL descartável explicitamente autorizado
+SKIPPED [1] tests/integration/test_postgres_contracts.py:66: Exige PostgreSQL descartável explicitamente autorizado
+SKIPPED [1] tests/integration/test_postgres_contracts.py:81: Exige PostgreSQL descartável explicitamente autorizado
+SKIPPED [1] tests/test_postgresql.py:12: Requer PostgreSQL de teste descartável e opt-in
+361 passed, 16 skipped, 3 warnings in 26.13s
