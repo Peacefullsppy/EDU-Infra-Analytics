@@ -1,34 +1,31 @@
 from logging.config import fileConfig
-
 from alembic import context
-from sqlalchemy import engine_from_config, pool
-
-from app.db import Base
-from app.models import User, Laboratory, Computer, AuditLog  # noqa: F401
-from app.settings import get_settings
+from sqlalchemy import create_engine, pool
+from app.core import settings
+from app.models import Base
 
 config = context.config
-config.set_main_option("sqlalchemy.url", get_settings()["database_url"].replace("%", "%%"))
 if config.config_file_name:
     fileConfig(config.config_file_name)
 target_metadata = Base.metadata
 
 
-def offline():
-    context.configure(url=get_settings()["database_url"], target_metadata=target_metadata, literal_binds=True)
+def run_migrations_offline():
+    context.configure(url=settings.database_url, target_metadata=target_metadata, literal_binds=True, dialect_opts={"paramstyle": "named"}, compare_type=True)
     with context.begin_transaction():
         context.run_migrations()
 
 
-def online():
-    connectable = engine_from_config(config.get_section(config.config_ini_section), prefix="sqlalchemy.", poolclass=pool.NullPool)
-    with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+def run_migrations_online():
+    engine = create_engine(settings.database_url, poolclass=pool.NullPool, connect_args={"check_same_thread": False} if settings.database_url.startswith("sqlite") else {})
+    with engine.connect() as connection:
+        context.configure(connection=connection, target_metadata=target_metadata, compare_type=True, render_as_batch=settings.database_url.startswith("sqlite"))
         with context.begin_transaction():
             context.run_migrations()
+    engine.dispose()
 
 
 if context.is_offline_mode():
-    offline()
+    run_migrations_offline()
 else:
-    online()
+    run_migrations_online()

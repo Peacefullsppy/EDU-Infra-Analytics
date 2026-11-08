@@ -1,3 +1,0 @@
-8799463 2026-11-02T21:17:44Z Documenta rastreabilidade da monografia, arquitetura e resultados reais
-54dda7f 2026-11-02T21:17:44Z Corrige disponibilidade e bootstrap; amplia pytest e evidencia HTTP 409
-c65db66 2026-11-02T21:17:44Z Importa codigo V0.1 fornecido pelo autor para auditoria

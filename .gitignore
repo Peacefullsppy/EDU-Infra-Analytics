@@ -1,20 +1,23 @@
+# Secrets
+.env
+**/.env
+!.env.example
 # Python
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.venv/
 *.egg-info/
-# Node
-node_modules/
-dist/
-# Configurações confidenciais
-.env
-.env.local
-*.sqlite
-*.sqlite3
-*.db
-# Artefatos temporários
-.DS_Store
-Thumbs.db
+.venv/
+.pytest_cache/
 .coverage
 htmlcov/
+# Databases and logs
+*.db
+*.sqlite*
+*.log
+# React
+node_modules/
+dist/
+# editor
+.vscode/
+.idea/
+.DS_Store

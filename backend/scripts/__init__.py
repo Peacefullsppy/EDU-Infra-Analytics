@@ -1,1 +1,1 @@
-"""Rotinas de conferência local do banco."""
+"""Ferramentas de diagnóstico e administração da instalação."""

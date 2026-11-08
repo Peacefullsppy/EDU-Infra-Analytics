@@ -1,3 +1,0 @@
-VERSAO 0002_unique_labs
-LABS_APOS [(1, 'Laboratorio de Teste', 'Predio A')]
-PCS_APOS 0
