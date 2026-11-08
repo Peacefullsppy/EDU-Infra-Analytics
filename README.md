@@ -95,13 +95,4 @@ python -m pytest -q -m e2e
 python -m pytest --cov=app --cov-report=term-missing
 ```
 
-Testes que dependem de um PostgreSQL real exigem **um banco descartável e autorização explícita**; testes de navegador exigem frontend/backend de teste ativos, Playwright e banco SQLite descartável. A CI provisiona os ambientes isolados. Instruções e limites: [`docs/TESTES.md`](docs/TESTES.md).
 
-## Documentação
-
-- [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md): componentes, fluxo de dados e responsabilidades.
-- [`docs/TESTES.md`](docs/TESTES.md): estratégia, execução local, CI e E2E.
-- [`docs/RESULTADOS_TESTES.md`](docs/RESULTADOS_TESTES.md): resultados verificáveis e limites da avaliação.
-- [`legal/GUIA_PUBLICACAO_LGPD.md`](legal/GUIA_PUBLICACAO_LGPD.md): requisitos jurídicos e operacionais antes da implantação.
-
-O IIE é um indicador heurístico de infraestrutura, não uma medida de aprendizagem. Os Termos e o Aviso de Privacidade são minutas que exigem adaptação e revisão para uso institucional real.
