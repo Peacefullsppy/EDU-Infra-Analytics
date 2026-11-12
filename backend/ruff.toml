@@ -1,0 +1,8 @@
+# Regras enxutas e verificaveis para a base legada do PFC.
+# E9: erros de sintaxe/indentacao; F821-F823: nomes indefinidos e variaveis;
+# W291-W293: erros de espaco em branco.
+target-version = "py313"
+line-length = 120
+extend-exclude = [".venv", "__pycache__", "edu_infra_dev.db"]
+[lint]
+select = ["E9", "F821", "F822", "F823", "W291", "W292", "W293"]
