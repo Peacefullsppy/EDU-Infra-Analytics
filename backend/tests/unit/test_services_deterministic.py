@@ -22,7 +22,7 @@ def test_computer_status_boundaries(active,seconds_ago,stale,expected):
     assert computer_status(pc,stale,now=T0) == expected
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.parametrize('cpu,ram,disk,expected', [
     (0,0,0,100.0), (100,100,100,40.0), (20,40,60,76.6),
     (100,0,0,79.0), (0,100,0,79.0), (0,0,100,82.0),
@@ -43,7 +43,7 @@ def test_indicator_math_exact(client,cpu,ram,disk,expected):
         assert result['online']==1
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.parametrize('active_count,online_count', [(1,0),(2,1),(3,2),(4,1)])
 def test_indicator_coverage_counts_only_observed_online(client,active_count,online_count):
     with client.Session() as db:
@@ -66,7 +66,7 @@ def test_indicator_coverage_counts_only_observed_online(client,active_count,onli
         else: assert result['score'] == pytest.approx(round((40+36)*online_count/active_count,2))
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.parametrize('cpu,ram,disk,classification', [
     (0,0,0,'adequado'),(40,40,40,'adequado'),
     (75,75,75,'atencao'), (100,100,100,'critico'),
@@ -83,7 +83,7 @@ def test_indicator_classification(client,cpu,ram,disk,classification):
         assert indicator(db,lab,now=T0)['classification'] == classification
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_indicator_no_labs_and_no_devices(client):
     with client.Session() as db:
         lab=Laboratory(name='Lab',location='Sala',name_key='lab',location_key='sala')
@@ -92,7 +92,7 @@ def test_indicator_no_labs_and_no_devices(client):
         assert item['score'] is None and item['total']==0 and item['classification']=='sem_dados'
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_system_settings_can_recreate_defaults(client):
     with client.Session() as db:
         db.delete(db.get(SystemSetting,1));db.commit()
@@ -103,7 +103,7 @@ def test_system_settings_can_recreate_defaults(client):
         assert db.get(SystemSetting,1) is not None
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_latest_metric_uses_collection_time_not_insert_order(client):
     with client.Session() as db:
         lab=Laboratory(name='Lab',location='Sala',name_key='lab',location_key='sala');db.add(lab);db.flush()
@@ -114,7 +114,7 @@ def test_latest_metric_uses_collection_time_not_insert_order(client):
         assert latest_metric(db,pc.id).cpu_percent==20
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.parametrize('kind,value,expected_severity', [
     ('cpu',90,'warning'),('cpu',96.9,'warning'),('cpu',97,'critical'),
     ('memory',90,'warning'),('memory',99,'critical'),('disk',100,'critical')
@@ -131,7 +131,7 @@ def test_alert_severity_boundaries(client,kind,value,expected_severity):
         assert len(alerts)==1 and alerts[0].type==kind and alerts[0].severity==expected_severity
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.parametrize('recovery,expected_state', [(89.9,'open'),(85,'open'),(84.9,'resolved'),(0,'resolved')])
 def test_alert_hysteresis_prevents_flapping(client,recovery,expected_state):
     with client.Session() as db:

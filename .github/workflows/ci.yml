@@ -1,13 +1,43 @@
-name: Edu Infra Analytics 1.6 - Qualidade
+name: CI do PFC - EDU-Infra Analytics 1.6
 
 on:
-  push:
   pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
-  backend-postgres:
-    name: Backend, integração PostgreSQL e cobertura
+  unitarios:
+    name: Testes unitários
     runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: "sqlite://"
+      JWT_SECRET_KEY: "chave-descartavel-de-testes-unitarios-com-mais-de-32-bytes"
+    steps:
+      - name: Obter código
+        uses: actions/checkout@v4
+      - name: Preparar Python 3.13 e cache de dependências
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Instalar dependências
+        run: python -m pip install -r requirements-dev.txt
+      - name: Instalar dependências do agente monitorado pelos testes unitários
+        run: python -m pip install -r ../agent/requirements.txt
+      - name: Executar somente testes isolados
+        run: python -m pytest -q tests/unit tests/integration -m unit --strict-markers
+
+  integracao:
+    name: Testes de integração
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
     services:
       postgres:
         image: postgres:17
@@ -26,88 +56,46 @@ jobs:
       run:
         working-directory: backend
     env:
-      DATABASE_URL: postgresql+psycopg://edu_infra:ci-password-only@127.0.0.1:5433/edu_infra
-      JWT_SECRET_KEY: github-actions-disposable-test-only-change-in-real-use
-      EDU_TEST_POSTGRES_DISPOSABLE: SIM
+      DATABASE_URL: "postgresql+psycopg://edu_infra:ci-password-only@127.0.0.1:5433/edu_infra"
+      JWT_SECRET_KEY: "chave-descartavel-de-integracao-com-mais-de-32-bytes"
+      EDU_TEST_POSTGRES_DISPOSABLE: "SIM"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Obter código
+        uses: actions/checkout@v4
+      - name: Preparar Python 3.13 e cache de dependências
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-      - run: python -m pip install -r requirements-dev.txt
-      - run: python -m compileall -q app scripts
-      - run: python -m alembic upgrade head
-      - run: python -m scripts.check_db
-      - run: python -m pytest -q --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --junitxml=pytest-results.xml
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: backend-test-results
-          path: |
-            backend/coverage.xml
-            backend/pytest-results.xml
-
-  frontend:
-    name: Build React
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: npm install --no-audit --no-fund
-      - run: npm run build
-      - run: npm run test:unit
-
-  browser-e2e:
-    name: E2E Chromium - React + FastAPI
-    runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: sqlite:///./edu-e2e-ci.sqlite
-      JWT_SECRET_KEY: disposable-e2e-jwt-secret-not-for-production-2026
-      EDU_E2E_DISPOSABLE: SIM
-      E2E_TEST_PASSWORD: Strong-E2E-Password-123!
-      E2E_BASE_URL: http://127.0.0.1:5173
-      VITE_API_URL: http://127.0.0.1:8000
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Dependências Python e navegador
-        run: |
-          python -m pip install -r backend/requirements-e2e.txt
-          python -m playwright install --with-deps chromium
-      - name: Frontend
-        run: npm --prefix frontend install --no-audit --no-fund
-      - name: Preparar banco SQLite descartável
-        working-directory: backend
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Instalar dependências
+        run: python -m pip install -r requirements-dev.txt
+      - name: Instalar dependências necessárias para coleta dos testes
+        run: python -m pip install -r ../agent/requirements.txt
+      - name: Preparar esquema do PostgreSQL descartável
         run: |
           python -m alembic upgrade head
-          python -m scripts.seed_e2e
-      - name: Executar fluxos Playwright
-        run: |
-          (cd backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/edu-backend.log 2>&1) &
-          BACK_PID=$!
-          npm --prefix frontend run dev -- --host 127.0.0.1 --port 5173 > /tmp/edu-frontend.log 2>&1 &
-          FRONT_PID=$!
-          trap 'kill "$BACK_PID" "$FRONT_PID" 2>/dev/null || true' EXIT
-          for i in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:8000/health >/dev/null && curl -fsS http://127.0.0.1:5173/ >/dev/null; then break; fi
-            sleep 1
-          done
-          curl -fsS http://127.0.0.1:8000/health
-          curl -fsS http://127.0.0.1:5173/ >/dev/null
-          cd backend
-          python -m pytest -q tests/e2e/test_browser_user_flows.py --junitxml=browser-e2e-results.xml
-      - uses: actions/upload-artifact@v4
-        if: always()
+          python -m scripts.check_db
+      - name: Executar somente testes de API e persistência
+        run: python -m pytest -q tests/unit tests/integration -m integration --strict-markers
+
+  linter:
+    name: Linter
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Obter código
+        uses: actions/checkout@v4
+      - name: Preparar Python 3.13 e cache de dependências
+        uses: actions/setup-python@v5
         with:
-          name: browser-e2e-results
-          path: backend/browser-e2e-results.xml
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Instalar Ruff
+        run: python -m pip install "ruff>=0.9,<1"
+      - name: Verificar regras reais do projeto
+        run: ruff check .

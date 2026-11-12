@@ -12,7 +12,7 @@ def patch_input(monkeypatch, name, email, password):
     monkeypatch.setattr(cli,'getpass',lambda _:password)
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.parametrize('name,email,password,message',[
     ('X','new@example.org','SecurePassword123!','Nome ou e-mail inválido'),
     ('Valid Name','invalid-email','SecurePassword123!','Nome ou e-mail inválido'),
@@ -26,14 +26,14 @@ def test_admin_cli_rejects_bad_input(client,monkeypatch,name,email,password,mess
         assert db.scalar(select(User.id).where(User.email=='new@example.org')) is None
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_admin_cli_rejects_existing_email(client,monkeypatch):
     monkeypatch.setattr(cli,'SessionLocal',client.Session)
     patch_input(monkeypatch,'Demo User','ADMIN@example.org','SecurePassword123!')
     with pytest.raises(SystemExit,match='E-mail já cadastrado'):cli.create_admin()
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_admin_cli_creates_hashed_administrator(client,monkeypatch,capsys):
     monkeypatch.setattr(cli,'SessionLocal',client.Session)
     patch_input(monkeypatch,'Demo Administrator','DEMO@example.org','SecurePassword123!')
