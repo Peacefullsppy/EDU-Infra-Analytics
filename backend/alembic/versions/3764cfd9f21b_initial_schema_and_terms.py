@@ -1,7 +1,7 @@
 """initial schema and terms
 
 Revision ID: 3764cfd9f21b
-Revises: 
+Revises:
 Create Date: 2026-11-07 19:36:26.122849
 """
 from typing import Sequence, Union
